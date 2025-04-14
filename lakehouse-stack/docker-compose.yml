@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+    command: server /data
+
+  nessie:
+    image: projectnessie/nessie
+    container_name: nessie
+    environment:
+      NESSIE_SERVER_PORT: 19120
+    ports:
+      - "19120:19120"
+    volumes:
+      - nessie_data:/data
+
+  trino:
+    image: projectnessie/trino
+    container_name: trino
+    environment:
+      TRINO_JVM_CONFIG: /etc/trino/jvm.config
+      TRINO_CONFIG: /etc/trino/config.properties
+      # Pass MinIO credentials to Trino
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY} 
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    ports:
+      - "8080:8080"
+    volumes:               
+      - ./config/trino:/etc/trino
+    depends_on:
+      - minio
+      - nessie
+
+  superset:
+    image: apache/superset
+    container_name: superset
+    environment:
+      SUPERSET_DATABASE_URI: postgresql+psycopg2://superset:superset@db/superset
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./config/superset:/app/pythonpath/superset_config.py
+
+volumes:
+  minio_data:
+  nessie_data:

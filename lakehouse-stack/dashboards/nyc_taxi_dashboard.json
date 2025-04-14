@@ -1,0 +1,42 @@
+{
+  "dashboard": {
+    "dashboard_title": "NYC Taxi Dashboard",
+    "position_json": "{\"gridPos\":{\"h\":6,\"i\":\"0\",\"w\":12,\"x\":0,\"y\":0},\"type\":\"graph\"}",
+    "panels": [
+      {
+        "type": "time_series",
+        "title": "NYC Taxi Rides Over Time",
+        "datasource": "NYC Taxi Data",
+        "queries": [
+          {
+            "sql": "SELECT pickup_datetime, COUNT(*) as ride_count FROM nyc_taxi GROUP BY pickup_datetime ORDER BY pickup_datetime",
+            "time_column": "pickup_datetime"
+          }
+        ],
+        "options": {
+          "showLegend": true,
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "type": "table",
+        "title": "Top 10 Taxi Destinations",
+        "datasource": "NYC Taxi Data",
+        "queries": [
+          {
+            "sql": "SELECT dropoff_location, COUNT(*) as ride_count FROM nyc_taxi GROUP BY dropoff_location ORDER BY ride_count DESC LIMIT 10"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "pagination": true
+        }
+      }
+    ],
+    "time_range": "Last 30 days",
+    "refresh_interval": "5m"
+  }
+}
